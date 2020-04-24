@@ -1,6 +1,5 @@
-import * as path from "path";
 import * as os from "os";
-import * as request from "request-promise";
+import * as path from "path";
 import * as task from "vsts-task-lib/task";
 import * as tool from "vsts-task-tool-lib/tool";
 
@@ -13,12 +12,8 @@ async function main(): Promise<void> {
   let arch = findArchitecture();
 
   // 2. Building version spec
-  let channel = task.getInput("channel", true);
-  let version = task.getInput("version", true);
-  let semVer = task.getInput("customVersion", false);
-  if (version === "latest" || semVer === "")
-    semVer = await findLatestSdkVersion(channel, arch);
-  let versionSpec = `${semVer}-${channel}`;
+  let downloadUrl = task.getInput("downloadUrl", true);
+  let versionSpec = task.getInput("versionSpec", true);
 
   // 3. Check if already available
   task.debug(
@@ -28,7 +23,7 @@ async function main(): Promise<void> {
 
   if (!toolPath) {
     // 4.1. Downloading SDK
-    await downloadAndCacheSdk(versionSpec, channel, arch);
+    await downloadAndCacheSdk(downloadUrl, versionSpec, arch);
 
     // 4.2. Verifying that tool is now available
     task.debug(
@@ -51,12 +46,11 @@ function findArchitecture() {
 }
 
 async function downloadAndCacheSdk(
+  downloadUrl: string,
   versionSpec: string,
-  channel: string,
   arch: string
 ): Promise<void> {
   // 1. Download SDK archive
-  let downloadUrl = `https://storage.googleapis.com/flutter_infra/releases/${channel}/${arch}/flutter_${arch}_${versionSpec}.zip`;
   task.debug(`Starting download archive from '${downloadUrl}'`);
   var bundleZip = await tool.downloadTool(downloadUrl);
   task.debug(
@@ -73,20 +67,6 @@ async function downloadAndCacheSdk(
     `Adding '${bundleDir}' to cache (${FLUTTER_TOOL_NAME},${versionSpec}, ${arch})`
   );
   tool.cacheDir(bundleDir, FLUTTER_TOOL_NAME, versionSpec, arch);
-}
-
-async function findLatestSdkVersion(
-  channel: string,
-  arch: string
-): Promise<string> {
-  var releasesUrl = `https://storage.googleapis.com/flutter_infra/releases/releases_${arch}.json`;
-  task.debug(`Finding latest version from '${releasesUrl}'`);
-  var body = await request.get(releasesUrl);
-  var json = JSON.parse(body);
-  var currentHash = json.current_release[channel];
-  task.debug(`Last version hash '${currentHash}'`);
-  var current = json.releases.find(item => item.hash === currentHash);
-  return current.version.substring(1); // removing leading 'v'
 }
 
 main().catch(error => {

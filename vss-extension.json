@@ -1,17 +1,17 @@
 {
   "manifestVersion": 1,
   "id": "flutterDevOps",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "name": "FlutterDevOps",
-  "description": "Flutter extension for Azure DevOps",
+  "description": "Another Flutter extension for Azure DevOps",
   "publisher": "UrbetrackRD",
-  "public": true,
+  "public": false,
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
     }
   ],
-  "categories": ["Pipelines"],
+  "categories": ["Azure Pipelines"],
   "icons": {
     "default": "icon.png"
   },
@@ -51,7 +51,7 @@
   ],
   "contributions": [
     {
-      "id": "flutter-install",
+      "id": "devops-install-flutter",
       "type": "ms.vss-distributed-task.task",
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
@@ -59,7 +59,7 @@
       }
     },
     {
-      "id": "flutter-build",
+      "id": "devops-build-flutter",
       "type": "ms.vss-distributed-task.task",
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
@@ -67,7 +67,7 @@
       }
     },
     {
-      "id": "flutter-test",
+      "id": "devops-test-flutter",
       "type": "ms.vss-distributed-task.task",
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
